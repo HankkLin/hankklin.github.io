@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Han (Hank) Lin — software engineer and Cornell Tech M.S. student. Experience, projects, algorithms, and system design.">
+  <title>Han (Hank) Lin | Software Engineer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header"><div class="page header-inner">
+    <a class="site-name" href="#top">Han (Hank) Lin</a>
+    <nav aria-label="Sections"><a href="#experience">Experience</a><a href="#projects">Projects</a><a href="#fundamentals">Fundamentals</a><a href="#education">Education</a></nav>
+  </div></header>
+  <main class="page" id="main">
+    <section class="profile" id="top" aria-labelledby="name">
+      <img class="headshot" src="headshot.jpg" alt="Headshot of Han (Hank) Lin" width="900" height="1106">
+      <div class="profile-copy">
+        <p class="overline">Software engineer · New York, NY</p>
+        <h1 id="name">Han (Hank) Lin</h1>
+        <p class="profile-subtitle">M.S. student at Cornell Tech · University of Virginia computer science graduate</p>
+        <p class="bio">I build software across systems, full-stack applications, and machine learning. At work, I’ve shipped tools used by internal teams. In my own projects, I use algorithms and system design to explore how software behaves, fails, and recovers.</p>
+        <ul class="contact-list" aria-label="Contact and profiles"><li><a href="mailto:hl2658@cornell.edu">hl2658@cornell.edu</a></li><li><a href="https://github.com/HankkLin">GitHub</a></li><li><a href="https://www.linkedin.com/in/hanlin888">LinkedIn</a></li></ul>
+      </div>
+    </section>
+
+    <section class="section" id="experience" aria-labelledby="experience-title">
+      <div class="section-label"><h2 id="experience-title">Experience</h2><p>Professional and teaching work</p></div>
+      <div class="section-body">
+        <article class="entry"><div class="entry-head"><div><h3>Deputy Engineer, Vision Business Unit</h3><p class="institution">SOLOMON Technology Corporation · Taipei, Taiwan</p></div><time>May–Dec 2025</time></div>
+          <ul><li>Built agentic AI React web applications that automated sales-report generation. Average preparation time fell from two hours to under ten minutes; valid submissions nearly doubled; adoption reached 65%.</li>
+            <li>Engineered a multimodal OpenAI/Gemini pipeline with few-shot prompting, multi-agent coordination, schema-validated outputs, retries, and fallbacks. An evaluation harness reported 99% groundedness, 93% F1, 90% exact match, and 6.2% character error rate.</li>
+            <li>Connected agents to internal lookups, pricing, and historical cases with OpenAI Agents SDK, GenAI SDK, MCP tool calling, and Gemini-embedding retrieval.</li></ul>
+        </article>
+        <article class="entry"><div class="entry-head"><div><h3>Software Engineer Intern, IT Department</h3><p class="institution">MSI Computer Corp. · City of Industry, CA</p></div><time>May–Aug 2024</time></div>
+          <ul><li>Built a full-stack internal survey system for 100+ MSI North America users using JavaScript/CSS, ASP.NET, C#, and MSSQL. Integrated company authentication and migrated legacy data for deployment without service disruption.</li></ul>
+        </article>
+        <article class="entry"><div class="entry-head"><div><h3>Engineering Intern, Core Technology R&amp;D Center</h3><p class="institution">PEGATRON Corp. · Taipei, Taiwan</p></div><time>Jun–Aug 2023</time></div>
+          <ul><li>Built a natural-language-to-SQL agent with the OpenAI API and LangChain, reporting 95% query accuracy across 1,000+ datasets.</li>
+            <li>Designed Toy Gandalf, a four-level prompt-engineering security game, and compared model behavior across GPT-3.5-turbo, GPT-4, and Davinci. <a href="https://github.com/HankkLin/toy_Gandalf">See the project</a>.</li>
+            <li>Introduced Scrum workflows, Mantis issue tracking, and Git protocols to support collaboration.</li></ul>
+        </article>
+        <article class="entry"><div class="entry-head"><div><h3>Language Assistant</h3><p class="institution">University of Virginia · Department of East Asian Languages</p></div><time>Aug 2024–May 2025</time></div>
+          <ul><li>Led daily Chinese conversation sessions for 20 undergraduates, prepared Mandarin and Taiwanese lessons, and helped organize cultural events for 100+ participants.</li></ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="projects" aria-labelledby="projects-title">
+      <div class="section-label"><h2 id="projects-title">Projects &amp; research</h2><p>Including work beyond my one-page résumé</p></div>
+      <div class="section-body">
+        <article class="entry project"><div class="entry-head"><div><h3>ClimbStream <a href="https://github.com/HankkLin/ClimbStream" aria-label="ClimbStream source code">↗</a></h3><p class="institution">C++20 · CMake · GoogleTest · event streaming</p></div><time>2026</time></div><p>Built a Kafka-inspired, single-node engine for climbing telemetry: session-keyed partitions, append-only persistent logs, consumer offsets, restart recovery, and deterministic replay. Its documented at-least-once semantics show the cost of committing offsets after processing. Replication, network protocols, and production durability are outside this milestone.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>TC Token Optimizer <a href="https://github.com/HankkLin/Chinese_simplifier" aria-label="TC Token Optimizer source code">↗</a></h3><p class="institution">JavaScript · OpenCC · Claude Code hooks and CLI</p></div><time>2026</time></div><p>Built a plugin and wrapper for compacting Traditional Chinese prompts, source reads, traces, and responses. Six reproducible fixtures showed 61–85% fewer tokenizer-measured tokens. The repository includes an audit, automated tests, and explicit limits: these are harness measurements, not billing results.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Go Desktop <a href="https://github.com/HankkLin/GoPractice" aria-label="Go Desktop source code">↗</a></h3><p class="institution">C# · .NET 9 · Avalonia · KataGo integration</p></div><time>2026</time></div><p>Built a playable Go application with 9×9, 13×13, and 19×19 boards. The rules engine handles captures, suicide prevention, ko, passes, resignation, and Chinese area scoring. The app supports SGF export and an optional KataGo opponent.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Campus Waste Classification</h3><p class="institution">PyTorch · ResNet-18 · computer vision</p></div><time>Jan–May 2025</time></div><p>Fine-tuned a frozen-backbone ResNet-18 with augmentation, learning-rate scheduling, and early stopping for recycling-image classification. Reported 84.7% accuracy and 94% F1.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Police Stop Bias Analysis</h3><p class="institution">scikit-learn · neural networks · feature engineering</p></div><time>Aug–Dec 2024</time></div><p>Evaluated nine models on 3.8M+ Virginia police-stop records. Reduced a roughly 1M-column one-hot feature space to about 1K and improved test accuracy from 71.85% to 74.50% without demographic features.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Cross-Lingual Tokenization</h3><p class="institution">Hugging Face Tokenizers · SentencePiece · NLP</p></div><time>Aug–Dec 2024</time></div><p>Compared tokenization across 30,000+ English, Japanese, and Chinese samples and proposed radical-based decomposition for logographic languages.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>UVA Bus Data Layer <a href="https://github.com/HankkLin/UVA-BUS-Data-Layer" aria-label="UVA Bus Data Layer source code">↗</a></h3><p class="institution">Java · SQLite · API data ingestion</p></div><time>2024</time></div><p>Read UVA bus data from an API, mapped JSON to domain objects, stored stops and routes in SQLite, and implemented services for closest-stop and route recommendations.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Toy Gandalf <a href="https://github.com/HankkLin/toy_Gandalf" aria-label="Toy Gandalf source code">↗</a></h3><p class="institution">Python · OpenAI API · prompt security</p></div><time>2023</time></div><p>Created a four-level password-guessing chatbot to explore prompt-engineering defenses. Compared behavior across GPT-3.5-turbo, GPT-4, and Davinci during my PEGATRON internship.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Course Review Application <a href="https://github.com/HankkLin/Course-Review-Application" aria-label="Course Review Application source code">↗</a></h3><p class="institution">Java · JavaFX · SQLite · course project</p></div><time>2024</time></div><p>Built a desktop application for course reviews and persisted user and review data. The repository documents a remaining refresh issue after edits and deletions.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Congressional Apportionment <a href="https://github.com/HankkLin/US-congress-apportion" aria-label="Congressional Apportionment source code">↗</a></h3><p class="institution">Java · algorithms · course project</p></div><time>2024</time></div><p>Implemented a command-line apportionment tool supporting Adams, Jefferson, and Huntington–Hill methods, configurable seat counts, and CSV/XLS/XLSX input.</p></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Tower of Saviors: Extreme Martial Arts <a href="https://github.com/HankkLin/TOS" aria-label="Tower of Saviors project repository">↗</a></h3><p class="institution">Unity 6 · C# · game and technical design</p></div><time>2026</time></div><p>Wrote game design and technical architecture documents for a fan-made action-puzzle RPG and set up foundational Unity project scaffolding. Combat, narrative, and level systems are design work; the game is not presented as completed.</p></article>
+        <p class="all-repos">More coursework and experiments are available on <a href="https://github.com/HankkLin?tab=repositories">my GitHub repositories page</a>.</p>
+      </div>
+    </section>
+
+    <section class="section" id="fundamentals" aria-labelledby="fundamentals-title"><div class="section-label"><h2 id="fundamentals-title">Fundamentals</h2><p>Practice and application</p></div><div class="section-body prose">
+      <p><strong>Algorithms and data structures.</strong> I practice problem solving on LeetCode and apply the same edge-case reasoning to Go board state, route queries, and apportionment algorithms. My UVA coursework included Data Structures &amp; Algorithms and Software Development Essentials.</p>
+      <p><strong>System design.</strong> ClimbStream makes partitioning, ordering, offset ownership, replay, and failure semantics explicit. At MSI, database migration and company authentication were part of a working deployment; at SOLOMON, I designed retrieval and fallback paths around workflow constraints.</p>
+      <p><strong>Testing and measurement.</strong> I use automated tests and evaluation: GoogleTest in ClimbStream, audited token fixtures in TC Token Optimizer, and model metrics in the ML projects.</p>
+    </div></section>
+
+    <section class="section" id="education" aria-labelledby="education-title"><div class="section-label"><h2 id="education-title">Education</h2></div><div class="section-body">
+      <div class="entry-head education-entry"><div><h3>Cornell Tech</h3><p>Jacobs Technion-Cornell Dual M.S. in Information Systems, Connective Media</p></div><time>2026–2028</time></div>
+      <div class="entry-head education-entry"><div><h3>University of Virginia</h3><p>B.A. in Computer Science · major GPA 3.81/4.00</p><p>Coursework: Machine Learning, Natural Language Processing, Artificial Intelligence, Data Structures &amp; Algorithms, Cybersecurity.</p></div><time>2021–2025</time></div>
+    </div></section>
+
+    <section class="section" id="skills" aria-labelledby="skills-title"><div class="section-label"><h2 id="skills-title">Technical skills</h2></div><div class="section-body skills-list">
+      <p><strong>Languages:</strong> Python, Go, C, C++, C#, Java, JavaScript, TypeScript, SQL, Bash</p>
+      <p><strong>Systems &amp; backend:</strong> C++20, .NET, ASP.NET, REST APIs, SQL/NoSQL, MSSQL, SQLite, caching, data partitioning, Docker, Git, CMake</p>
+      <p><strong>AI &amp; ML:</strong> PyTorch, Hugging Face, scikit-learn, RAG, embeddings, OpenAI Agents SDK, LangChain, MCP, tool calling, structured outputs, LLM evaluation</p>
+      <p><strong>Web:</strong> React, Node.js, Flask, FastAPI, HTML/CSS</p>
+      <p><strong>Languages spoken:</strong> Mandarin (native), English (fluent), Japanese (JLPT N2)</p>
+    </div></section>
+  </main>
+  <footer class="site-footer"><div class="page footer-inner"><span>Han (Hank) Lin</span><a href="mailto:hl2658@cornell.edu">hl2658@cornell.edu</a><a href="#top">Back to top ↑</a></div></footer>
+</body>
+</html>
+
