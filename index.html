@@ -3,25 +3,118 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Han (Hank) Lin — software engineer and Cornell Tech M.S. student. Experience, projects, algorithms, and system design.">
+  <meta name="description" content="Han (Hank) Lin — software engineer and Cornell Tech M.S. student. Project stories, engineering decisions, and demos across systems, applications, and AI.">
   <title>Han (Hank) Lin | Software Engineer</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="demo.js" defer></script>
 </head>
-<body>
+<body id="top">
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header"><div class="page header-inner">
     <a class="site-name" href="#top">Han (Hank) Lin</a>
-    <nav aria-label="Sections"><a href="#experience">Experience</a><a href="#projects">Projects</a><a href="#fundamentals">Fundamentals</a><a href="#education">Education</a></nav>
+    <nav aria-label="Sections"><a href="#projects">Project stories</a><a href="#experience">Experience</a><a href="#fundamentals">Fundamentals</a><a href="#education">Education</a></nav>
   </div></header>
   <main class="page" id="main">
-    <section class="profile" id="top" aria-labelledby="name">
+    <section class="profile" aria-labelledby="name">
       <img class="headshot" src="headshot.jpg" alt="Headshot of Han (Hank) Lin" width="900" height="1106">
       <div class="profile-copy">
         <p class="overline">Software engineer · New York, NY</p>
         <h1 id="name">Han (Hank) Lin</h1>
         <p class="profile-subtitle">M.S. student at Cornell Tech · University of Virginia computer science graduate</p>
-        <p class="bio">I build software across systems, full-stack applications, and machine learning. At work, I’ve shipped tools used by internal teams. In my own projects, I use algorithms and system design to explore how software behaves, fails, and recovers.</p>
+        <p class="bio">I build systems, full-stack applications, and machine learning projects. I like understanding how a system works, where it can fail, and how to check that it does what I expect. Below, I explain the problems I worked on, the choices I made, and how to try the demos.</p>
+        <a class="story-link" href="#projects">Explore the projects and try a demo →</a>
         <ul class="contact-list" aria-label="Contact and profiles"><li><a href="mailto:hl2658@cornell.edu">hl2658@cornell.edu</a></li><li><a href="https://github.com/HankkLin">GitHub</a></li><li><a href="https://www.linkedin.com/in/hanlin888">LinkedIn</a></li></ul>
+      </div>
+    </section>
+
+    <section class="section" id="projects" aria-labelledby="projects-title">
+      <div class="section-label"><h2 id="projects-title">Project stories</h2><p>Questions, decisions, and working demos</p></div>
+      <div class="section-body">
+        <p class="section-intro">Each demo shows a choice in the implementation. I go into detail on three projects, then share shorter notes from research and coursework.</p>
+        <div class="story-index" aria-label="Featured project stories"><a href="#climbstream">01 · Recovering an event stream</a><a href="#token-optimizer">02 · Measuring useful compression</a><a href="#go-desktop">03 · Making a board game trustworthy</a></div>
+
+        <article class="entry project featured-story" id="climbstream">
+          <div class="entry-head"><div><p class="overline">01 / Systems</p><h3>ClimbStream</h3><p class="institution">C++20 · CMake · GoogleTest · 2026</p></div><a class="source-link" href="https://github.com/HankkLin/ClimbStream">Source &amp; setup ↗</a></div>
+          <p class="story-lead">I used climbing events to make stream recovery easier to understand.</p>
+          <p>A session starts, an attempt begins, and the climber either sends the route or fails the attempt. Those events need to stay in order. I built ClimbStream so I could inspect how they are stored, what a consumer has processed, and what happens when it restarts or replays old events.</p>
+          <h4>Starting with one node</h4>
+          <p>I kept the first milestone in one process on one node. That lets me check the basics before adding concurrency and networking: events from the same session stay in order, offsets survive reopening the log, and each consumer tracks its own progress.</p>
+          <div class="architecture-flow" aria-label="ClimbStream event path"><span>Producer</span><span aria-hidden="true">→</span><span>Session partition</span><span aria-hidden="true">→</span><span>JSONL log</span><span aria-hidden="true">→</span><span>Consumer + offset</span></div>
+          <h4>Deciding when to save progress</h4>
+          <p>The broker uses the session ID to choose a stable partition, then assigns that partition's next offset. It appends each event as a JSON line. When the log reopens, it checks that the stored offsets have no gaps. I store consumer offsets separately so consumers can move independently.</p>
+          <p>The consumer processes an event <em>before</em> saving its offset. If processing fails, it can retry. If it crashes after processing but before saving, it will process that event again on restart. That is the tradeoff behind at-least-once processing. Replay reads the history without changing the live consumer's position.</p>
+          <div class="interactive-demo" id="stream-demo" hidden>
+            <div class="demo-heading"><h4>Try the recovery model</h4><span class="demo-badge">Browser simulation</span></div>
+            <p>This browser model shows the C++ engine's offset behavior for one partition. It keeps state while the page is open. The Restart button restarts the simulated consumer and keeps its log and committed offset.</p>
+            <p class="demo-instructions">Publish two events → consume → publish another → restart → consume. Then try a crash before commit and consume again to see a repeated event.</p>
+            <div class="demo-controls"><button type="button" data-stream-action="publish">Publish event</button><button type="button" data-stream-action="consume">Consume pending</button><button type="button" data-stream-action="restart">Restart consumer</button><button type="button" data-stream-action="crash">Process one, crash before commit</button><button type="button" data-stream-action="replay">Replay from 0</button><button type="button" data-stream-action="reset" class="secondary-button">Reset</button></div>
+            <dl class="demo-stats"><div><dt>Events in log</dt><dd id="stream-count">0</dd></div><div><dt>Last committed offset</dt><dd id="stream-committed">None</dd></div><div><dt>Next read offset</dt><dd id="stream-next">0</dd></div></dl>
+            <div class="demo-output"><div><h5>Append-only log</h5><ol id="stream-log" start="0"><li class="empty-state">Publish an event to begin.</li></ol></div><div><h5>Consumer activity</h5><ol id="stream-activity"><li class="empty-state">No events processed yet.</li></ol></div></div>
+            <p class="demo-status" id="stream-status" role="status" aria-live="polite" aria-atomic="true">Ready. Publish an event to begin.</p>
+          </div>
+          <noscript><p>The interactive recovery model needs JavaScript. The source and CLI walkthrough below are available without it.</p></noscript>
+          <details class="story-details"><summary>Run the C++ demo</summary><div class="details-body">
+            <p>With C++20 and CMake 3.24+, clone the repository and build it. CMake downloads the pinned dependencies.</p>
+            <pre><code>cmake -S . -B build
+cmake --build build
+ctest --test-dir build --output-on-failure</code></pre>
+            <p>For a single-configuration build, publish two events and run a consumer with a persistent ID. On Windows, use the executable location produced by your CMake generator, which may include a configuration folder such as <code>Debug</code>.</p>
+            <pre><code>./build/climbstream-producer data/logs session-demo SESSION_STARTED event-1
+./build/climbstream-producer data/logs session-demo ATTEMPT_STARTED event-2
+./build/climbstream-consumer data/logs data/offsets demo-consumer</code></pre>
+            <p>Publish a third event, then run the same consumer again. It should emit only the new event. For replay, pass <code>--replay &lt;partition&gt; 0</code>, using the session's actual partition. The committed offset should stay unchanged. Both CLIs use four partitions; keep that count consistent when reopening data.</p>
+          </div></details>
+          <p class="story-boundary"><strong>Current scope:</strong> persistent logs, independent consumer positions, restart recovery, and explicit replay. Concurrent ingestion, replication, networking, and the climbing UI are planned. The engine does not yet guarantee crash-consistent storage for production use.</p>
+        </article>
+
+        <article class="entry project featured-story" id="token-optimizer">
+          <div class="entry-head"><div><p class="overline">02 / Developer tools</p><h3>TC Token Optimizer</h3><p class="institution">JavaScript · OpenCC · Claude Code hooks and CLI · 2026</p></div><a class="source-link" href="https://github.com/HankkLin/Chinese_simplifier">Source &amp; setup ↗</a></div>
+          <p class="story-lead">I wanted to reduce token use without losing the task's instructions.</p>
+          <p>TC Token Optimizer looks at the token overhead of Traditional Chinese in coding-agent workflows. Shortening the text only helps if the agent still has the references and instructions it needs to do the work.</p>
+          <h4>Rewriting the prompt before it reaches the agent</h4>
+          <p>Claude Code's tool hooks can change tool inputs, but its prompt-submit hook cannot replace a user prompt before it enters context. So I use a CLI wrapper to rewrite prompts before Claude Code receives them. Hooks handle source reads and traces, and a skill keeps responses concise.</p>
+          <h4>Checking what the compression preserves</h4>
+          <p>The experiment compares original and compressed fixtures using <code>js-tiktoken</code> with <code>cl100k_base</code>. A fixture audit checks that the prompt pairs keep their constraints. It also compares a proxy estimate with the tokenizer count and allows a difference of up to eight percentage points.</p>
+          <p>The six recorded fixtures use approximately 61 to 85% fewer tokens after compression. But the wrapper fits prompts into a template based on a hint table. It can silently drop instructions that the table does not cover. The fixture audit checks those examples; it cannot promise that every new prompt keeps its meaning.</p>
+          <details class="story-details"><summary>Run the token comparison</summary><div class="details-body">
+            <p>Clone the source, install its Node.js dependencies, and run the checks from the repository root.</p>
+            <pre><code>npm install
+npm test
+npm run audit:fixtures
+npm run measure:tokens</code></pre>
+            <p>Open <code>test/results/token-savings.md</code> beside the original and compressed fixtures. Check the instructions that remain as well as the token counts. To take the experiment further, try a prompt with an unusual preservation rule and check whether the rule survives before letting an agent act on it.</p>
+          </div></details>
+          <p class="story-boundary"><strong>Measurement limits:</strong> these results cover the recorded fixtures and the stated tokenizer. They do not measure billing savings. Converting Traditional Chinese to Simplified Chinese alone does not account for the reduction. If a prompt must stay word for word, bypass the lossy wrapper.</p>
+        </article>
+
+        <article class="entry project featured-story" id="go-desktop">
+          <div class="entry-head"><div><p class="overline">03 / Desktop applications</p><h3>Go Desktop</h3><p class="institution">C# · .NET 9 · Avalonia · KataGo · 2026</p></div><a class="source-link" href="https://github.com/HankkLin/GoPractice">Source &amp; setup ↗</a></div>
+          <p class="story-lead">The app needs to handle a legal game before the AI opponent matters.</p>
+          <p>For Go Desktop, that means keeping the board correct through captures, illegal moves, passes, and scoring. I also wanted it to be playable before the user sets up an external AI engine.</p>
+          <h4>Keeping the rules local</h4>
+          <p>I built a local rules engine for captures, suicide prevention, ko, resignation, and Chinese area scoring. The Avalonia app has 9×9, 13×13, and 19×19 boards, color selection, and setup stones. KataGo is optional; its difficulty settings change the visit and time budgets.</p>
+          <p>Without KataGo, the app uses a weak local opponent. That lets someone try the game before configuring the stronger engine. The demo follows the same order: check that the moves are legal, then add KataGo. You can export a game as SGF to review it outside the app.</p>
+          <details class="story-details"><summary>Try the desktop app</summary><div class="details-body">
+            <p>Follow the repository's Windows setup instructions for the .NET/NuGet paths, then launch the app:</p>
+            <pre><code>dotnet run --project src\GoDesktop.App\GoDesktop.App.csproj</code></pre>
+            <p>Start with a 9×9 board and the local opponent. Use setup stones to arrange a capture, start the game, and play the capturing move. Then explore suicide prevention and ko with prepared positions. Pass to reach scoring and export the game as SGF.</p>
+            <p>Then open the KataGo tab, set the executable and model paths, save the settings, and compare difficulty levels. You can check how the rules work before installing the stronger engine.</p>
+          </div></details>
+          <p class="story-boundary"><strong>Check in the demo:</strong> legal board changes, scoring at the end of a game, and SGF export. The fallback lets you play immediately; KataGo is the stronger opponent once its executable and model are configured.</p>
+        </article>
+
+        <h3 class="more-stories-title">Research and smaller projects</h3>
+        <article class="entry project"><div class="entry-head"><div><h3>Campus Waste Classification</h3><p class="institution">PyTorch · ResNet-18 · Jan–May 2025</p></div></div><p class="story-lead">Using a pretrained model to classify recycling images.</p><p>I fine-tuned a frozen-backbone ResNet-18 with augmentation, learning-rate scheduling, and early stopping. The reported results were 84.7% accuracy and 94% F1. Both scores help describe performance, but interpreting their difference requires the class distribution and the F1 averaging method.</p><details class="story-details"><summary>Demo idea: inspect the predictions</summary><div class="details-body"><p>A next step would be to show held-out images with their predicted and true classes, then look at errors in each category. That would show where the model struggles beyond the overall scores. I have not added an interactive image demo here yet.</p></div></details></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Police Stop Bias Analysis</h3><p class="institution">scikit-learn · neural networks · Aug–Dec 2024</p></div></div><p class="story-lead">Testing how well models predict without demographic features.</p><p>I evaluated nine models on 3.8M+ Virginia police-stop records. Part of the work was reducing a roughly one-million-column one-hot feature space to about one thousand columns. Test accuracy improved from 71.85% to 74.50% without demographic features. Choosing how to represent the data mattered alongside choosing the model.</p><p class="story-boundary">The accuracy result does not prove fairness. Other inputs may still act as proxies for demographics.</p><details class="story-details"><summary>Demo idea: compare errors across groups</summary><div class="details-body"><p>A next demo could compare feature-space size and test performance, then examine subgroup error rates before making a fairness claim. This page does not include that subgroup evaluation or an interactive dashboard.</p></div></details></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Cross-Lingual Tokenization</h3><p class="institution">Hugging Face Tokenizers · SentencePiece · Aug–Dec 2024</p></div></div><p class="story-lead">Comparing how tokenizers split different writing systems.</p><p>I compared tokenization across 30,000+ English, Japanese, and Chinese samples. For logographic languages, I proposed radical-based decomposition as another way to represent the text. The design question was what units the model should receive when the writing system changes.</p><details class="story-details"><summary>Demo idea: show the token boundaries</summary><div class="details-body"><p>A next demo could show multilingual examples with their token boundaries and counts, then compare the proposed radical decomposition with the existing representations. The proposal still needs validation before I can claim an improvement.</p></div></details></article>
+        <article class="entry project"><div class="entry-head"><div><h3>UVA Bus Data Layer <a href="https://github.com/HankkLin/UVA-BUS-Data-Layer" aria-label="UVA Bus Data Layer source code">↗</a></h3><p class="institution">Java · SQLite · 2024</p></div></div><p class="story-lead">Turning bus API data into stop and route recommendations.</p><p>I split the data layer into readers, storage, and a query service. The readers map API JSON into stops and bus lines, the database driver stores them in SQLite, and the service finds the closest stop or recommends a bus line. Following that path shows how the raw data becomes an answer for a rider.</p><details class="story-details"><summary>Follow a route query</summary><div class="details-body"><p>Use <code>DatabaseDriver</code> to initialize and populate the database with <code>addStops</code> and <code>addBusLines</code>. Then call the closest-stop and recommendation methods in <code>BusLineService</code>. Compare the stored route data with the recommendation. This project is a data layer; this page has no live map demo.</p></div></details></article>
+        <article class="entry project" id="toy-gandalf"><div class="entry-head"><div><h3>Toy Gandalf <a href="https://github.com/HankkLin/toy_Gandalf" aria-label="Toy Gandalf source code">↗</a></h3><p class="institution">Python · OpenAI API · 2023</p></div></div><p class="story-lead">A password-guessing game for testing prompt defenses.</p><p>During my PEGATRON internship, I built a chatbot with four difficulty levels. The player tries to make the model reveal a protected password. Changing the level changes the prompt, so you can compare how the chatbot responds. Comparing models also shows how their behavior differs.</p><details class="story-details"><summary>Try the original prototype</summary><div class="details-body"><p>Read the level prompts in the source to see how each tells the model to protect the password. Try the same attack prompt across levels and record whether the response reveals the secret. The repository uses older model integrations, so running it today may require API updates. The game helps explore prompt defenses; it does not guarantee security in production.</p></div></details></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Course Review Application <a href="https://github.com/HankkLin/Course-Review-Application" aria-label="Course Review Application source code">↗</a></h3><p class="institution">Java · JavaFX · SQLite · 2024</p></div></div><p class="story-lead">Saving a review and updating the screen are separate problems.</p><p>I built a desktop app that stores users and course reviews in SQLite. There is a documented refresh bug: after a review is edited or deleted, the average score stays the same until you leave the page and return. The stored data and the displayed value both need to be correct.</p><details class="story-details"><summary>Reproduce the refresh bug</summary><div class="details-body"><p>Launch with JavaFX configured, edit or delete a review, and check the average score. Leave the page and return to compare the displayed value. The repository also documents layout problems when resizing the window.</p></div></details></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Congressional Apportionment <a href="https://github.com/HankkLin/US-congress-apportion" aria-label="Congressional Apportionment source code">↗</a></h3><p class="institution">Java · algorithms · 2024</p></div></div><p class="story-lead">The same population data can produce different seat allocations.</p><p>I built a command-line tool with Adams, Jefferson, and Huntington–Hill methods, configurable seat counts, and CSV/XLS/XLSX input. Run each method with the same dataset and seat count to see how the algorithm changes the allocation.</p><details class="story-details"><summary>Compare the allocation methods</summary><div class="details-body"><p>Build with the repository's Gradle wrapper and use Java 17 or later. From the directory containing the generated JAR and your input file:</p><pre><code>java -jar Apportionment.jar example.csv 435 --adams
+java -jar Apportionment.jar example.csv 435 --jefferson
+java -jar Apportionment.jar example.csv 435 --huntington</code></pre><p>Compare state-by-state allocations and verify that the allocated seats total the requested count.</p></div></details></article>
+        <article class="entry project"><div class="entry-head"><div><h3>Tower of Saviors: Extreme Martial Arts <a href="https://github.com/HankkLin/TOS" aria-label="Tower of Saviors project repository">↗</a></h3><p class="institution">Unity 6 · C# · game and technical design</p></div><time>2026</time></div><p>Wrote game design and technical architecture documents for a fan-made action-puzzle RPG and set up foundational Unity project scaffolding. Combat, narrative, and level systems are design work; the game is not presented as completed.</p></article>
+        <p class="all-repos">More coursework and experiments are available on <a href="https://github.com/HankkLin?tab=repositories">my GitHub repositories page</a>.</p>
       </div>
     </section>
 
@@ -29,39 +122,21 @@
       <div class="section-label"><h2 id="experience-title">Experience</h2><p>Professional and teaching work</p></div>
       <div class="section-body">
         <article class="entry"><div class="entry-head"><div><h3>Deputy Engineer, Vision Business Unit</h3><p class="institution">SOLOMON Technology Corporation · Taipei, Taiwan</p></div><time>May–Dec 2025</time></div>
-          <ul><li>Built agentic AI React web applications that automated sales-report generation. Average preparation time fell from two hours to under ten minutes; valid submissions nearly doubled; adoption reached 65%.</li>
-            <li>Engineered a multimodal OpenAI/Gemini pipeline with few-shot prompting, multi-agent coordination, schema-validated outputs, retries, and fallbacks. An evaluation harness reported 99% groundedness, 93% F1, 90% exact match, and 6.2% character error rate.</li>
-            <li>Connected agents to internal lookups, pricing, and historical cases with OpenAI Agents SDK, GenAI SDK, MCP tool calling, and Gemini-embedding retrieval.</li></ul>
+          <p>Preparing a sales report took roughly two hours. To automate that workflow, the app needed to look up internal information, produce a valid submission, and recover when a model failed.</p>
+          <p>I built the React app around a multimodal OpenAI/Gemini pipeline. Agents used tools and retrieval to access internal lookups, pricing, and historical cases. I added schema validation, retries, and fallbacks so the output could become a usable report. I also used an evaluation harness to check the pipeline alongside the interface.</p>
+          <p>Average preparation time fell below ten minutes, valid submissions nearly doubled, and adoption reached 65%. The harness reported 99% groundedness, 93% F1, 90% exact match, and 6.2% character error rate. These measure different parts of the workflow, including factual support and extraction quality.</p>
         </article>
         <article class="entry"><div class="entry-head"><div><h3>Software Engineer Intern, IT Department</h3><p class="institution">MSI Computer Corp. · City of Industry, CA</p></div><time>May–Aug 2024</time></div>
-          <ul><li>Built a full-stack internal survey system for 100+ MSI North America users using JavaScript/CSS, ASP.NET, C#, and MSSQL. Integrated company authentication and migrated legacy data for deployment without service disruption.</li></ul>
+          <p>The survey system had to work within the company's existing environment. That meant integrating authentication and bringing over legacy data as well as building the form.</p>
+          <p>I built the JavaScript/CSS interface, ASP.NET/C# backend, and MSSQL storage. I integrated company authentication and migrated the existing data so the system could replace the live internal tool. It served 100+ North America users and deployed without service disruption.</p>
         </article>
         <article class="entry"><div class="entry-head"><div><h3>Engineering Intern, Core Technology R&amp;D Center</h3><p class="institution">PEGATRON Corp. · Taipei, Taiwan</p></div><time>Jun–Aug 2023</time></div>
-          <ul><li>Built a natural-language-to-SQL agent with the OpenAI API and LangChain, reporting 95% query accuracy across 1,000+ datasets.</li>
-            <li>Designed Toy Gandalf, a four-level prompt-engineering security game, and compared model behavior across GPT-3.5-turbo, GPT-4, and Davinci. <a href="https://github.com/HankkLin/toy_Gandalf">See the project</a>.</li>
-            <li>Introduced Scrum workflows, Mantis issue tracking, and Git protocols to support collaboration.</li></ul>
+          <p>I worked on converting natural-language requests into SQL and testing how chatbots respond when users try to override their instructions.</p>
+          <p>For the SQL work, I built an OpenAI API/LangChain agent with reported query accuracy of 95% across 1,000+ datasets. For prompt defenses, I built <a href="#toy-gandalf">Toy Gandalf</a>, a four-level password-guessing game, and compared GPT-3.5-turbo, GPT-4, and Davinci. I also introduced Scrum workflows, Mantis issue tracking, and Git protocols to help the team collaborate.</p>
         </article>
         <article class="entry"><div class="entry-head"><div><h3>Language Assistant</h3><p class="institution">University of Virginia · Department of East Asian Languages</p></div><time>Aug 2024–May 2025</time></div>
-          <ul><li>Led daily Chinese conversation sessions for 20 undergraduates, prepared Mandarin and Taiwanese lessons, and helped organize cultural events for 100+ participants.</li></ul>
+          <p>In conversation sessions, I could see whether students could use what I explained. I led daily Chinese sessions for 20 undergraduates, prepared Mandarin and Taiwanese lessons, and helped organize cultural events for 100+ participants.</p>
         </article>
-      </div>
-    </section>
-
-    <section class="section" id="projects" aria-labelledby="projects-title">
-      <div class="section-label"><h2 id="projects-title">Projects &amp; research</h2><p>Including work beyond my one-page résumé</p></div>
-      <div class="section-body">
-        <article class="entry project"><div class="entry-head"><div><h3>ClimbStream <a href="https://github.com/HankkLin/ClimbStream" aria-label="ClimbStream source code">↗</a></h3><p class="institution">C++20 · CMake · GoogleTest · event streaming</p></div><time>2026</time></div><p>Built a Kafka-inspired, single-node engine for climbing telemetry: session-keyed partitions, append-only persistent logs, consumer offsets, restart recovery, and deterministic replay. Its documented at-least-once semantics show the cost of committing offsets after processing. Replication, network protocols, and production durability are outside this milestone.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>TC Token Optimizer <a href="https://github.com/HankkLin/Chinese_simplifier" aria-label="TC Token Optimizer source code">↗</a></h3><p class="institution">JavaScript · OpenCC · Claude Code hooks and CLI</p></div><time>2026</time></div><p>Built a plugin and wrapper for compacting Traditional Chinese prompts, source reads, traces, and responses. Six reproducible fixtures showed 61–85% fewer tokenizer-measured tokens. The repository includes an audit, automated tests, and explicit limits: these are harness measurements, not billing results.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>Go Desktop <a href="https://github.com/HankkLin/GoPractice" aria-label="Go Desktop source code">↗</a></h3><p class="institution">C# · .NET 9 · Avalonia · KataGo integration</p></div><time>2026</time></div><p>Built a playable Go application with 9×9, 13×13, and 19×19 boards. The rules engine handles captures, suicide prevention, ko, passes, resignation, and Chinese area scoring. The app supports SGF export and an optional KataGo opponent.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>Campus Waste Classification</h3><p class="institution">PyTorch · ResNet-18 · computer vision</p></div><time>Jan–May 2025</time></div><p>Fine-tuned a frozen-backbone ResNet-18 with augmentation, learning-rate scheduling, and early stopping for recycling-image classification. Reported 84.7% accuracy and 94% F1.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>Police Stop Bias Analysis</h3><p class="institution">scikit-learn · neural networks · feature engineering</p></div><time>Aug–Dec 2024</time></div><p>Evaluated nine models on 3.8M+ Virginia police-stop records. Reduced a roughly 1M-column one-hot feature space to about 1K and improved test accuracy from 71.85% to 74.50% without demographic features.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>Cross-Lingual Tokenization</h3><p class="institution">Hugging Face Tokenizers · SentencePiece · NLP</p></div><time>Aug–Dec 2024</time></div><p>Compared tokenization across 30,000+ English, Japanese, and Chinese samples and proposed radical-based decomposition for logographic languages.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>UVA Bus Data Layer <a href="https://github.com/HankkLin/UVA-BUS-Data-Layer" aria-label="UVA Bus Data Layer source code">↗</a></h3><p class="institution">Java · SQLite · API data ingestion</p></div><time>2024</time></div><p>Read UVA bus data from an API, mapped JSON to domain objects, stored stops and routes in SQLite, and implemented services for closest-stop and route recommendations.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>Toy Gandalf <a href="https://github.com/HankkLin/toy_Gandalf" aria-label="Toy Gandalf source code">↗</a></h3><p class="institution">Python · OpenAI API · prompt security</p></div><time>2023</time></div><p>Created a four-level password-guessing chatbot to explore prompt-engineering defenses. Compared behavior across GPT-3.5-turbo, GPT-4, and Davinci during my PEGATRON internship.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>Course Review Application <a href="https://github.com/HankkLin/Course-Review-Application" aria-label="Course Review Application source code">↗</a></h3><p class="institution">Java · JavaFX · SQLite · course project</p></div><time>2024</time></div><p>Built a desktop application for course reviews and persisted user and review data. The repository documents a remaining refresh issue after edits and deletions.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>Congressional Apportionment <a href="https://github.com/HankkLin/US-congress-apportion" aria-label="Congressional Apportionment source code">↗</a></h3><p class="institution">Java · algorithms · course project</p></div><time>2024</time></div><p>Implemented a command-line apportionment tool supporting Adams, Jefferson, and Huntington–Hill methods, configurable seat counts, and CSV/XLS/XLSX input.</p></article>
-        <article class="entry project"><div class="entry-head"><div><h3>Tower of Saviors: Extreme Martial Arts <a href="https://github.com/HankkLin/TOS" aria-label="Tower of Saviors project repository">↗</a></h3><p class="institution">Unity 6 · C# · game and technical design</p></div><time>2026</time></div><p>Wrote game design and technical architecture documents for a fan-made action-puzzle RPG and set up foundational Unity project scaffolding. Combat, narrative, and level systems are design work; the game is not presented as completed.</p></article>
-        <p class="all-repos">More coursework and experiments are available on <a href="https://github.com/HankkLin?tab=repositories">my GitHub repositories page</a>.</p>
       </div>
     </section>
 
@@ -84,7 +159,7 @@
       <p><strong>Languages spoken:</strong> Mandarin (native), English (fluent), Japanese (JLPT N2)</p>
     </div></section>
   </main>
+  <a class="back-to-top" href="#top" aria-label="Back to top">↑ Top</a>
   <footer class="site-footer"><div class="page footer-inner"><span>Han (Hank) Lin</span><a href="mailto:hl2658@cornell.edu">hl2658@cornell.edu</a><a href="#top">Back to top ↑</a></div></footer>
 </body>
 </html>
-
